@@ -8,6 +8,10 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap, sha256
 from models import db, User
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -16,6 +20,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT')  # Change this!
+jwt = JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -97,6 +103,26 @@ def get_single_user(user_id):
         return "ok", 200
 
     return "Invalid Method", 404
+
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+    usercheck = User.query.filter_by(username=username, password=sha256(password)).first()
+    if usercheck == None:
+      return jsonify({"msg": "Bad username or password"}), 401
+    # Identity can be any data that is json serializable
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token), 200
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
