@@ -100,6 +100,7 @@ def get_single_user(user_id):
         if current_user is None:
             raise APIException('User not found', status_code=404)
         db.session.delete(current_user)
+        db.session.commit()
         return "ok", 200
 
     return "Invalid Method", 404
