@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
-from models import db, User
+from models import db, User, Plant
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
@@ -104,6 +104,36 @@ def get_single_user(user_id):
         return "ok", 200
 
     return "Invalid Method", 404
+
+@app.route('/plants', methods=['POST', 'GET'])
+def handle_plants():
+    """
+    Create plant and retrieve all plants
+    """
+
+    # POST request
+    if request.method == 'POST':
+        body = request.get_json()
+
+        if body is None:
+            raise APIException("You need to specify the request body as a json object", status_code=400)
+        if 'name' not in body:
+            raise APIException('You need to specify the name', status_code=400)
+          
+
+        plant = Plant(name=body['name'])
+        db.session.add(plant)
+        db.session.commit()
+        return "ok", 200
+
+    # GET request
+    if request.method == 'GET':
+        all_plants = Plant.query.all()
+        all_plants = list(map(lambda x: x.serialize(), all_plants))
+        return jsonify(all_plants), 200
+
+    return "Invalid Method", 404
+
 
 @app.route('/login', methods=['POST'])
 def login():
