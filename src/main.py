@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
-from utils import APIException, generate_sitemap, sha256
+from utils import APIException, generate_sitemap
 from models import db, User
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
@@ -52,7 +52,7 @@ def handle_user():
         if 'password' not in body:
             raise APIException('You need to specify the password', status_code=400)    
 
-        user1 = User(username=body['username'], email=body['email'], password=sha256(body['password']))
+        user1 = User(username=body['username'], email=body['email'], password=body['password'])
         db.session.add(user1)
         db.session.commit()
         return "ok", 200
@@ -84,7 +84,7 @@ def get_single_user(user_id):
         if "email" in body:
             current_user.email = body["email"]
         if "password" in body:
-            current_user.password = sha256(body["password"])
+            current_user.password = body["password"]
         db.session.commit()
 
         return jsonify(current_user.serialize()), 200
@@ -116,7 +116,7 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    usercheck = User.query.filter_by(username=username, password=sha256(password)).first()
+    usercheck = User.query.filter_by(username=username, password=password).first()
     if usercheck == None:
       return jsonify({"msg": "Bad username or password"}), 401
     # Identity can be any data that is json serializable

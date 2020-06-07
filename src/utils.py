@@ -1,5 +1,5 @@
 from flask import jsonify, url_for
-import hashlib
+# import hashlib
 
 class APIException(Exception):
     status_code = 400
@@ -37,7 +37,7 @@ def generate_sitemap(app):
         <h1>Hello Rigo!!</h1>
         This is your api home, remember to specify a real endpoint path like: <ul style="text-align: left;">"""+links_html+"</ul></div>"
 
-def sha256(string):
-    m = hashlib.sha256()
-    m.update(string.encode('utf-8'))
-    return m.hexdigest()
+# def sha256(string):
+#     m = hashlib.sha256()
+#     m.update(string.encode('utf-8'))
+#     return m.hexdigest()

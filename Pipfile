@@ -17,7 +17,6 @@ mysql-connector-python = "*"
 flask-cors = "*"
 gunicorn = "*"
 mysqlclient = "*"
-hashlib = "*"
 flask-jwt-extended = "*"
 
 [requires]
